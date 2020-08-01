@@ -7,15 +7,48 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    var databaseController: DatabaseProtocol?
+    var window: UIWindow?
+ 
+    
+    // This is used for logging out as we cannot simply pop a navigation view controller
+    private lazy var mainViewController: UITabBarController = {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let initialViewController = storyboard.instantiateViewController(withIdentifier: "HomeSearchViewController")
+        
+        let navigationController = UINavigationController(rootViewController: initialViewController)
+        
+        let tabBarController = UITabBarController()
+        tabBarController.setViewControllers([navigationController], animated: false)
+        return tabBarController
+        
+    }()
 
-
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        // Listens to changes in the authentication
+        databaseController = FirebaseController()
+        window = UIWindow()
+        Auth.auth().addStateDidChangeListener( { (auth, user) in
+            if (user != nil) {
+                
+                self.window?.rootViewController = self.mainViewController
+                self.window?.makeKeyAndVisible()
+            }
+        })
+        
+        
         return true
+
     }
 
     // MARK: UISceneSession Lifecycle
